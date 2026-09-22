@@ -1,0 +1,15 @@
+# Build output
+bin/
+obj/
+dist/
+build/
+*.zip
+
+# IDE
+*.user
+*.suo
+.vs/
+
+# Local-only working files, deliberately kept out of the published repo
+CLAUDE.md
+tools/

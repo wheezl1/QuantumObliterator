@@ -1,0 +1,89 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>QuantumObliterator</AssemblyName>
+    <RootNamespace>QuantumObliterator</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <!-- The one place a release is bumped. Everything else - the assembly metadata and the
+         [BepInPlugin] version - is derived from it. -->
+    <PluginVersion>0.3.0</PluginVersion>
+    <Version>$(PluginVersion)</Version>
+    <AssemblyVersion>$(PluginVersion).0</AssemblyVersion>
+    <FileVersion>$(PluginVersion).0</FileVersion>
+    <Product>QuantumObliterator</Product>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <DebugType>portable</DebugType>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- CS0436: Jotunn also exports a global ConfigurationManagerAttributes. Ours deliberately
+         wins - Jotunn's own docs require each plugin to carry its own copy of the template. -->
+    <NoWarn>$(NoWarn);CS0436</NoWarn>
+
+    <!-- Proprietary game assemblies. Referenced from the local install; never committed. -->
+    <VALHEIM_MANAGED Condition="'$(VALHEIM_MANAGED)' == ''">/mnt/hornburg/SteamLibrary/steamapps/common/Valheim/valheim_Data/Managed</VALHEIM_MANAGED>
+    <!-- BepInEx/Jotunn come from a Gale profile rather than NuGet, so the build needs no
+         package for them and always matches exactly what the game will load. -->
+    <GALE_BEPINEX Condition="'$(GALE_BEPINEX)' == ''">$(HOME)/.local/share/com.kesomannen.gale/valheim/profiles/fort-kickass-modpack/BepInEx</GALE_BEPINEX>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="src/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <!-- ExcludeAssets=runtime keeps the publicizer's own AsmResolver DLLs out of bin/, so the
+         manual copy to a Gale profile is just the one file. -->
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Publicize: Incinerator.m_nview / .isInUse and Container.m_inventory are private. -->
+    <Reference Include="assembly_valheim" Publicize="true" Private="false">
+      <HintPath>$(VALHEIM_MANAGED)/assembly_valheim.dll</HintPath>
+    </Reference>
+    <!-- Localization lives here, not in assembly_valheim. -->
+    <!-- Required for overload resolution on ZPackage.Write/Read: its overload set mentions
+         Vector2i/Vector2s, which live here rather than in assembly_valheim. -->
+    <Reference Include="assembly_utils" Private="false">
+      <HintPath>$(VALHEIM_MANAGED)/assembly_utils.dll</HintPath>
+    </Reference>
+    <Reference Include="assembly_guiutils" Private="false">
+      <HintPath>$(VALHEIM_MANAGED)/assembly_guiutils.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine" Private="false">
+      <HintPath>$(VALHEIM_MANAGED)/UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule" Private="false">
+      <HintPath>$(VALHEIM_MANAGED)/UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule" Private="false">
+      <HintPath>$(VALHEIM_MANAGED)/UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx" Private="false">
+      <HintPath>$(GALE_BEPINEX)/core/BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony" Private="false">
+      <HintPath>$(GALE_BEPINEX)/core/0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Jotunn" Private="false">
+      <HintPath>$(GALE_BEPINEX)/plugins/ValheimModding-Jotunn/Jotunn.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <!-- [BepInPlugin] needs a compile-time constant, so emit one from <PluginVersion>. The project
+       sets EnableDefaultCompileItems=false, hence the explicit <Compile> item. In Lines=, ';'
+       separates lines, so C# statement terminators have to be escaped as %3B. -->
+  <Target Name="GeneratePluginInfo" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <PluginInfoFile>$(IntermediateOutputPath)PluginInfo.g.cs</PluginInfoFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(PluginInfoFile)" Overwrite="true" WriteOnlyWhenDifferent="true"
+                      Lines="// &lt;auto-generated /&gt;;namespace QuantumObliterator;{;    internal static class PluginInfo;    {;        internal const string Version = &quot;$(PluginVersion)&quot;%3B;    };}" />
+    <ItemGroup>
+      <Compile Include="$(PluginInfoFile)" />
+    </ItemGroup>
+  </Target>
+
+</Project>
