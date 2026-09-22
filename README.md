@@ -24,13 +24,10 @@ are spread across the map.
   message and nothing is consumed.
 - All or nothing: if the whole shipment doesn't fit, none of it moves and no fuel is spent.
 - The lightning on a shipment does no damage, so it can't destroy the sign that tags the pair.
-  Normal obliteration keeps vanilla's damaging lightning.
+  Normal obliteration keeps vanilla's damaging lightning, however
 - Transfers are handled by the server, not the client.
 
 ## Compatibility
-
-Built and tested against Valheim 1.0.15 (build 25390630), BepInExPack Valheim 5.4.2350 and
-Jotunn 2.30.2.
 
 Required on the server and on every client. A vanilla client connecting to a modded server would
 fall through to ordinary obliteration and destroy its cargo, so the mod refuses that setup rather
@@ -38,7 +35,9 @@ than risk it. Works on dedicated servers and on client-hosted worlds.
 
 Known issue: if someone has the receiving Obliterator's container open and moves an item around
 inside it at the exact moment a shipment lands, that delivery can be lost. Just having it open is
-fine.
+fine. 
+
+Any mods that modify the behavior of the Obliterator could conflict as well. 
 
 ## Configuration
 
@@ -57,7 +56,7 @@ from the server, so clients get the server's values and can't override them.
 | `VerboseLogging` | `false` | Local only. Writes transfer details to `LogOutput.log`. |
 
 One Thunderstone covers 1080 weight by default, which is roughly three full stacks of metal bars.
-The stone you burn is paid for on top of that, so it doesn't eat into the allowance.
+The fuel item(s) you burn are paid for on top of the amount of weight they allow for, so it doesn't eat into the allowance. (3 stacks of metal bars is 1080 weight + a Thunderstone's 10 weight is 1090 weight, but the calculation ignores the fuel weight)
 
 ## Installation
 
