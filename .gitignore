@@ -2,7 +2,6 @@
 bin/
 obj/
 dist/
-build/
 *.zip
 
 # IDE
